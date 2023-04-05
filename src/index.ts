@@ -32,6 +32,13 @@ app.get('/api/frutas', (_, res) => {
   });
 });
 
+app.get('/api/cardapio/:data', (req, res) => {
+  const data = req.params.data;
+  connection.query(`SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE ${data}`).then(([rows]) => {
+    res.send(rows);
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
