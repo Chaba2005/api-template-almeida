@@ -34,7 +34,7 @@ app.get('/api/frutas', (_, res) => {
 
 app.get('/api/cardapio/:data', (req, res) => {
   const data = req.params.data;
-  connection.query(`SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE ${data}`).then(([rows]) => {
+  connection.query(`SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE data = ${data}`).then(([rows]) => {
     res.send(rows);
   });
 });
