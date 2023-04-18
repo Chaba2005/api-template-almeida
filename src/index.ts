@@ -39,6 +39,25 @@ app.get('/api/cardapio/:data', (req, res) => {
   });
 });
 
+app.post('/saldo', (req, res) => {
+  // Obtenha o RA e a senha do corpo da requisição
+  const { ra, senha } = req.body;
+
+  // Verifique se o RA e a senha estão presentes na requisição
+  if (!ra || !senha) {
+    // Se não estiverem presentes, retorne um erro de requisição inválida
+    return res.status(400).json({ error: 'RA e senha são obrigatórios.' });
+  }
+
+  // Faça a consulta ao banco de dados para obter o saldo relacionado ao RA e senha
+  connection.query(
+    'SELECT saldo FROM Saldo_RU WHERE ra = ? AND senha = ?',
+    [ra, senha]).then(([rows]) => {
+      res.send(rows);
+    }
+  );
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
