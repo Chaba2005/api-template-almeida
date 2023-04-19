@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import bodyParser from 'body-parser';
 
 import professores from './data/professores.json' assert { type: 'json' };
 import { connection } from './db';
@@ -13,6 +14,8 @@ app.use(
     optionsSuccessStatus: 200
   })
 );
+
+app.use(bodyParser.json());
 
 app.get('/', (_, res) => {
   res.send('Hello world!');
@@ -32,31 +35,48 @@ app.get('/api/frutas', (_, res) => {
   });
 });
 
-app.get('/api/cardapio/:data', (req, res) => {
+app.get('/api/cardapio/:data', async(req, res) => {
   const data = req.params.data;
-  connection.query(`SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE data = ${data}`).then(([rows]) => {
+  console.log(data);
+
+  try {
+    const [rows] = await connection.query(
+      "SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE data = ?", [data]);
     res.send(rows);
-  });
+  } catch (err) {
+    res.status(404).json({ error: "Data não encontrada." });
+  }
 });
 
-app.post('/saldo', (req, res) => {
-  // Obtenha o RA e a senha do corpo da requisição
-  const { ra, senha } = req.body;
+app.post('/api/saldo', async(req, res) => {
+  console.log(req.body);
 
+  // Obtenha o RA e a senha do corpo da requisição
   // Verifique se o RA e a senha estão presentes na requisição
-  if (!ra || !senha) {
+  if (!req.body?.ra || !req.body?.senha) {
     // Se não estiverem presentes, retorne um erro de requisição inválida
-    return res.status(400).json({ error: 'RA e senha são obrigatórios.' });
+    return res.status(400).json({ parsedBody: req.body, error: 'RA e senha são obrigatórios.' });
   }
 
-  // Faça a consulta ao banco de dados para obter o saldo relacionado ao RA e senha
-  connection.query(
-    'SELECT saldo FROM Saldo_RU WHERE ra = ? AND senha = ?',
-    [ra, senha]).then(([rows]) => {
-      res.send(rows);
-    }
-  );
+  const { ra, senha } = req.body;
+
+  // Faça a consulta ao banc o de dados para obter o saldo relacionado ao RA e senha 
+  try {
+    const [rows] = await connection.query(
+      'SELECT saldo FROM Saldo_RU WHERE ra = ? AND senha = ?', [ra, senha]);
+    return res.send(rows);
+  } catch (err) {
+    return res.status(404).json({ error: 'Usuário não encontrado ou senha incorreta.' });
+  }
 });
+
+/*
+.then(([rows]) => {
+      res.send(rows);
+    }).catch(err => {
+      res.status(404).json({ error: 'Usuário não encontrado ou senha incorreta' });
+    })
+*/
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
