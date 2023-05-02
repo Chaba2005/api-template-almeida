@@ -71,7 +71,7 @@ app.get('/api/cardapio/:data', async(req, res) => {
   }
 });
 
-/*app.post('/api/saldo', async(req, res) => {
+app.post('/api/saldo', async(req, res) => {
   console.log(req.body);
 
   // Obtenha o RA e a senha do corpo da requisição
@@ -87,11 +87,15 @@ app.get('/api/cardapio/:data', async(req, res) => {
   try {
     const [rows] = await connection.query(
       'SELECT saldo FROM Saldo_RU WHERE ra = ? AND senha = ?', [ra, senha]);
+    if ( Object.keys(rows).length === 0) {
+        
+        return res.status(404).json({ error: 'Usuário não encontrado ou senha incorreta.' });
+      } else 
     return res.send(rows);
   } catch (err) {
     return res.status(404).json({ error: 'Usuário não encontrado ou senha incorreta.' });
   }
-});*/
+});
 
 /*
 .then(([rows]) => {
