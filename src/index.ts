@@ -30,18 +30,6 @@ app.get('api/echo/:text', (req, res) => {
 });
 
 
-app.get('/api/cardapio/:data', async(req, res) => {
-  const data = req.params.data;
-  console.log(data);
-
-  try {
-    const [rows] = await connection.query(
-      "SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE data = ?", [data]);
-    res.send(rows);
-  } catch (err) {
-    res.status(404).json({ error: "Data não encontrada." });
-  }
-});
 
 app.get('/api/saldo/:ra/:senha', async(req, res) => {
   const ra = req.params.ra;
@@ -65,7 +53,11 @@ app.get('/api/cardapio/:data', async(req, res) => {
   try {
     const [rows] = await connection.query(
       "SELECT principal,guarnicao,salada,sobremesa,suco,periodo,vegetariano FROM Cardapio WHERE data = ?", [data]);
-    res.send(rows);
+      if ( Object.keys(rows).length === 0) {
+        
+        return res.status(404).json({ error: 'Cardápio indiposnível!' });
+      } else 
+    return res.send(rows);
   } catch (err) {
     res.status(404).json({ error: "Data não encontrada." });
   }
